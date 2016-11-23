@@ -32,10 +32,10 @@ import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
-import org.eclipse.che.api.core.util.CompositeLineConsumer;
-import org.eclipse.che.api.core.util.FileLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
+import org.eclipse.che.api.core.util.lineconsumer.ConcurrentCompositeLineConsumer;
+import org.eclipse.che.api.core.util.lineconsumer.ConcurrentFileLineConsumer;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
@@ -279,14 +279,13 @@ public class CheEnvironmentEngine {
                                                 ServerException {
         List<Instance> machinesCopy = null;
         EnvironmentHolder environmentHolder;
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             environmentHolder = environments.get(workspaceId);
             if (environmentHolder == null || environmentHolder.status != EnvStatus.RUNNING) {
                 throw new EnvironmentNotRunningException(
                         format("Stop of not running environment of workspace with ID '%s' is not allowed.",
                                workspaceId));
             }
-            environments.remove(workspaceId);
             List<Instance> machines = environmentHolder.machines;
             if (machines != null && !machines.isEmpty()) {
                 machinesCopy = new ArrayList<>(machines);
@@ -296,6 +295,10 @@ public class CheEnvironmentEngine {
         // long operation - perform out of lock
         if (machinesCopy != null) {
             destroyEnvironment(environmentHolder.networkId, machinesCopy);
+        }
+
+        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+            environments.remove(workspaceId);
         }
     }
 
@@ -1159,8 +1162,8 @@ public class CheEnvironmentEngine {
             }
         };
         try {
-            return new CompositeLineConsumer(new FileLineConsumer(getMachineLogsFile(machineId)),
-                                             lineConsumer);
+            return new ConcurrentCompositeLineConsumer(new ConcurrentFileLineConsumer(getMachineLogsFile(machineId)),
+                                                       lineConsumer);
         } catch (IOException e) {
             throw new MachineException(format("Unable create log file '%s' for machine '%s'.",
                                               e.getLocalizedMessage(),

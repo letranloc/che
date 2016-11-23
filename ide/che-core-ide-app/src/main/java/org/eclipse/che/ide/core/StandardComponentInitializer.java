@@ -655,6 +655,19 @@ public class StandardComponentInitializer {
         actionManager.registerAction("noOpAction", new NoOpAction());
         actionManager.registerAction("signatureHelp", signatureHelpAction);
 
+        DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
+        actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
+
+        editorContextMenuGroup.add(undoAction);
+        editorContextMenuGroup.add(redoAction);
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(formatterAction);
+
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(fullTextSearchAction);
+        editorContextMenuGroup.add(closeActiveEditorAction);
+
+
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('F').build(), "fullTextSearch");
@@ -668,6 +681,10 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('e').build(), "openRecentFiles");
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('s').build(), "noOpAction");
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), "deleteItem");
+
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), "newFile");
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), "createProject");
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('A').build(), "importProject");
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), "closeActiveEditor");
