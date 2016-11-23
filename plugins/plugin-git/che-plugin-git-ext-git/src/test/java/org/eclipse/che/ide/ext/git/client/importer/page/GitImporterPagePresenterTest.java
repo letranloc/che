@@ -106,6 +106,17 @@ public class GitImporterPagePresenterTest {
     }
 
     @Test
+    public void testUrlWithSlashAtTheEnd() {
+        // test for url with slash at the end of the path
+        String correctUrl = "git://hostname.com/path/to/repo.git/";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.projectUrlChanged(correctUrl);
+
+        verifyInvocationsForCorrectUrl(correctUrl);
+    }
+
+    @Test
     public void testUrlWithoutUsername() {
         String correctUrl = "git@hostname.com:projectName.git";
         when(view.getProjectName()).thenReturn("");

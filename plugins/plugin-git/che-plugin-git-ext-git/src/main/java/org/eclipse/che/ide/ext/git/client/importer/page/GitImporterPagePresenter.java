@@ -29,15 +29,17 @@ import java.util.Map;
  */
 public class GitImporterPagePresenter extends AbstractWizardPage<MutableProjectConfig> implements GitImporterPageView.ActionDelegate {
 
+    private static final String HOST_PATTERN = "([A-Za-z0-9]+(\\.|\\-)?)*[A-Za-z0-9]+";
+    private static final String REPO_PATTERN = "([A-Za-z0-9]+(\\.|\\-|/)?)*[A-Za-z0-9]+/?$";
+
     // An alternative scp-like syntax: [user@]host.xz:path/to/repo.git/
-    private static final RegExp SCP_LIKE_SYNTAX = RegExp.compile("^([A-Za-z0-9_\\.\\-]+@)?([A-Za-z0-9]+(\\.|\\-)?)*[A-Za-z0-9]+:" +
-                                                                 "([A-Za-z0-9_\\.\\-]+\\/?)*[A-Za-z0-9]+$");
+    private static final RegExp SCP_LIKE_SYNTAX = RegExp.compile("^([A-Za-z0-9_\\.\\-]+@)?" + HOST_PATTERN + ":" + REPO_PATTERN);
     // the transport protocol
     private static final RegExp PROTOCOL        = RegExp.compile("(http|https|git|ssh|ftp|ftps)://");
     // the address of the remote server between // or @ and : or /
-    private static final RegExp HOST            = RegExp.compile("(//|@)([A-Za-z0-9]+(\\.|\\-)?)*[A-Za-z0-9]+(/|:)");
-    // the repository name
-    private static final RegExp REPO_NAME       = RegExp.compile("/[A-Za-z0-9_\\.\\-]+$");
+    private static final RegExp HOST            = RegExp.compile("(//|@)" + HOST_PATTERN + "(/|:)");
+    // the repository path or name
+    private static final RegExp REPO            = RegExp.compile("/" + REPO_PATTERN);
     // start with white space
     private static final RegExp WHITE_SPACE     = RegExp.compile("^\\s");
 
@@ -257,7 +259,7 @@ public class GitImporterPagePresenter extends AbstractWizardPage<MutableProjectC
             return false;
         }
 
-        if (!REPO_NAME.test(url)) {
+        if (!REPO.test(url)) {
             view.markURLInvalid();
             view.setURLErrorMessage(locale.importProjectMessageNameRepoIncorrect());
             return false;
