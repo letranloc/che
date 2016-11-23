@@ -212,7 +212,7 @@ public class WorkspaceDaoTest {
 
         workspaceDao.create(workspace);
 
-        assertEquals(workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
+        assertEquals(new WorkspaceImpl(workspaceDao.get(workspace.getId())), new WorkspaceImpl(workspace, workspace.getAccount()));
     }
 
     @Test(expectedExceptions = ConflictException.class)
@@ -232,7 +232,7 @@ public class WorkspaceDaoTest {
         final WorkspaceImpl newWorkspace = createWorkspace("new-id", workspace.getAccount(), workspace2.getConfig().getName());
         final WorkspaceImpl expected = new WorkspaceImpl(newWorkspace, newWorkspace.getAccount());
         expected.setAccount(newWorkspace.getAccount());
-        assertEquals(workspaceDao.create(newWorkspace), expected);
+        assertEquals(new WorkspaceImpl(workspaceDao.create(newWorkspace)), expected);
     }
 
     @Test(expectedExceptions = ConflictException.class)
@@ -357,7 +357,7 @@ public class WorkspaceDaoTest {
 
         workspaceDao.update(workspace);
 
-        assertEquals(workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
+        assertEquals(new WorkspaceImpl(workspaceDao.get(workspace.getId())), new WorkspaceImpl(workspace, workspace.getAccount()));
     }
 
     @Test(expectedExceptions = NotFoundException.class)

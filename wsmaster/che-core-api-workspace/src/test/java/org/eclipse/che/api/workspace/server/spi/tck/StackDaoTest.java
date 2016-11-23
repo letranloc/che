@@ -177,7 +177,7 @@ public class StackDaoTest {
 
         stackDao.update(stack);
 
-        assertEquals(stackDao.getById(stack.getId()), new StackImpl(stack));
+        assertEquals(new StackImpl(stackDao.getById(stack.getId())), new StackImpl(stack));
     }
 
     @Test(expectedExceptions = ConflictException.class)
